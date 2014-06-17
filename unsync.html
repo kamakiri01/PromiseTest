@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript">
+    //Promiseをパイプして直列に走らせる
+    var linearPromise = function(num){
+        var loopCount = 0;
+        return(function(){
+                var startTime = new Date(), endTime = 0;
+                var fetchTime = function(){
+                    var p = new Promise(function(done){
+                            gemPromiseTime = new Date();
+                            done();
+                    });
+                    p.then(function(){
+                            if(loopCount < num){
+                                loopCount += 1;
+                                var shrinkPromise = fetchTime();
+                                shrinkPromise();
+                            }else{
+                                endTime = new Date();
+                                console.log("linear");
+                                console.log(endTime - startTime);
+                            }
+                    })
+                }
+                fetchTime();
+        })
+    };
+    //並列して走らせる
+    var parallelPromise = function(num){
+        var loopCount = 0;
+        return(function(){
+                var i;
+                var arr = [];
+                var startTime = new Date(), endTime = 0;
+                for(i = 0;i<num;i++){
+                    arr[i] = new Promise(function(done){
+                            gemPromiseTime = new Date();
+                            done();
+                    });
+                    arr[i].then(function(){
+                    });
+                }
+                Promise.all(arr).then(function(d){
+                        endTime = new Date();
+                        console.log("paralell");
+                        console.log(endTime - startTime);
+                })
+        })
+    };
+    window.onload = function(){
+        var lev = 100000;
+        document.getElementById("b1").onclick = function(){
+                var linearInit = linearPromise(lev);
+                linearInit();
+        };
+        document.getElementById("b2").onclick = function(){
+                var paralellInit = parallelPromise(lev);
+                paralellInit();
+        };
+    }
+    </script>
+</head>
+<body>
+<div>
+<input type="button" value="Linear" id="b1"/>
+<input type="button" value="Parallel" id="b2"/>
+</div>
+</body>
+</html>
